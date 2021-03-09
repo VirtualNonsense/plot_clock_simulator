@@ -14,7 +14,7 @@ from plot_clock import PlotClock
 async def __draw_indefinitely(plot_clock: PlotClock, points: List[List[float]]):
     while True:
         for p in points:
-            plot_clock.got_to(p[0], p[1])
+            await plot_clock.got_to(p[0], p[1])
             print(p[0], p[1])
             await asyncio.sleep(1)
 
@@ -35,7 +35,7 @@ async def __main(loop):
     lower = 2
     upper = np.sqrt(5)
 
-    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.2)
+    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.005)
 
     points = [
         [0, 2],
