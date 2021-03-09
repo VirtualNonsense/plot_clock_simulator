@@ -20,12 +20,15 @@ class Queue:
 
 
 class PlotClock:
-    def __init__(self, upper_arm_length: float, lower_arm_length: float, servo_distance: float):
+    def __init__(self, upper_arm_length: float, lower_arm_length: float, servo_distance: float, servo_speed: float):
         self.__r_angle: float = np.pi / 2
         self.__l_angle: float = np.pi / 2
         self.__upper_arm_length = upper_arm_length
         self.__lower_arm_length = lower_arm_length
         self.__distance = servo_distance
+        self.servo_speed = servo_speed
+        self.__t_x: float = 0
+        self.__t_y: float = 0
 
     # ##################################################################################################################
     # Properties
@@ -52,8 +55,8 @@ class PlotClock:
 
     @property
     def right_joint(self) -> List[int]:
-
-        return [self.__lower_arm_length * np.cos(self.__r_angle) + self.__distance, self.__lower_arm_length * np.sin(self.__r_angle)]
+        return [self.__lower_arm_length * np.cos(self.__r_angle) + self.__distance,
+                self.__lower_arm_length * np.sin(self.__r_angle)]
 
     @property
     def servo_angles(self):
@@ -61,7 +64,7 @@ class PlotClock:
 
     @property
     def arms(self) -> Tuple[List[int], List[int]]:
-        coord = [self.left_servo, self.left_joint, self.theory_pen_joint, self.right_joint,  self.right_servo]
+        coord = [self.left_servo, self.left_joint, self.theory_pen_joint, self.right_joint, self.right_servo]
         xs, ys = zip(*coord)  # create lists of x and y values
         return xs, ys
 
@@ -81,7 +84,7 @@ class PlotClock:
 
         beta_1 = loc(q_beta, self.__lower_arm_length, self.__upper_arm_length)
 
-        beta_2 = np.arctan(y / r_x) if r_x != 0 else np.pi/2
+        beta_2 = np.arctan(y / r_x) if r_x != 0 else np.pi / 2
         self.__r_angle = np.pi - (beta_1 + beta_2)
 
     # ##################################################################################################################
@@ -95,23 +98,3 @@ class PlotClock:
         cosa = np.cos(self.__l_angle)
         sina = np.sin(self.__l_angle)
         # D = np.power(2*l1*cosa, 2) - 4 * (np.power(l1*cosa, 2) + np.power(y, 2) + 2*y*l1*sina + np.power())
-
-
-if __name__ == '__main__':
-    D = 2
-    lower = 2
-    upper = np.sqrt(5)
-
-    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D)
-    p.got_to(1, 1)
-
-    print(p.servo_angles)
-
-    plt.style.use("dark_background")
-    fig = plt.figure()
-    ax0 = fig.add_subplot(1, 1, 1)
-    ax0.set_title("PlotClock")
-    ax0.axis("equal")
-    x, y = p.arms
-    ax0.plot(x, y)
-    plt.show()
