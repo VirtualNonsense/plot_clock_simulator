@@ -6,8 +6,23 @@ import numpy as np
 from math_util import loc, get_intersections
 
 
+class DataWindow:
+    def __init__(self, length):
+        self.length = length
+        self.window: list = []
+
+    def add(self, element):
+        self.window.append(element)
+        if len(self.window) > self.length:
+            self.window.pop(0)
+
+
 class PlotClock:
-    def __init__(self, upper_arm_length: float, lower_arm_length: float, servo_distance: float, servo_speed: float):
+    def __init__(self, upper_arm_length: float,
+                 lower_arm_length: float,
+                 servo_distance: float,
+                 servo_speed: float,
+                 trail_length: int = 2000):
         self.__r_angle: float = np.pi / 2
         self.__r_target_angle: float = np.pi / 2
         self.__l_angle: float = np.pi / 2
@@ -16,10 +31,9 @@ class PlotClock:
         self.__lower_arm_length = lower_arm_length
         self.__distance = servo_distance
         self.servo_speed = servo_speed
+        self.pen_trail_window = DataWindow(trail_length)
         self.__t_x: float = 0
         self.__t_y: float = 0
-        self.__x: float = 0
-        self.__y: float = 0
         self.angle_tolerance = servo_speed * 2
 
     # ##################################################################################################################
@@ -35,10 +49,12 @@ class PlotClock:
 
     @property
     def pen_joint(self):
-        return [self.__x, self.__y]
+        if len(self.pen_trail_window.window) < 1:
+            return [None, None]
+        return self.pen_trail_window.window[-1]
 
     @property
-    def theory_pen_joint(self):
+    def target_pen_joint(self):
         return [self.__t_x, self.__t_y]
 
     @property
@@ -58,6 +74,13 @@ class PlotClock:
     def arms(self) -> Tuple[List[int], List[int]]:
         coord = [self.left_servo, self.left_joint, self.pen_joint, self.right_joint, self.right_servo]
         xs, ys = zip(*coord)  # create lists of x and y values
+        return xs, ys
+
+    @property
+    def pen_trail(self):
+        if len(self.pen_trail_window.window) < 1:
+            return 0, 0
+        xs, ys = zip(*self.pen_trail_window.window)
         return xs, ys
 
     # ##################################################################################################################
@@ -110,9 +133,7 @@ class PlotClock:
         x1, y1, x2, y2 = intersections
 
         if y1 > y2:
-            self.__x = x1
-            self.__y = y1
+            self.pen_trail_window.add([x1, y1])
             return
 
-        self.__x = x2
-        self.__y = y2
+        self.pen_trail_window.add([x2, y2])

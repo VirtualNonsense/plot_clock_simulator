@@ -11,21 +11,24 @@ import numpy as np
 from plot_clock import PlotClock
 
 
-async def __draw_indefinitely(plot_clock: PlotClock, points: List[List[float]]):
+async def __got_to_indefinitely(plot_clock: PlotClock, points: List[List[float]]):
     while True:
         for p in points:
             await plot_clock.got_to(p[0], p[1])
-            print(p[0], p[1])
             await asyncio.sleep(1)
 
 
 async def __update_plot(ax: Axes, plot_clock: PlotClock, color: str = "b"):
     while True:
         t = ax.get_lines()
-        if len(t) > 0:
+        while len(t) > 0:
             ax.lines.remove(t[-1])
+            t = ax.get_lines()
+
         x, y = plot_clock.arms
         ax.plot(x, y, color=color)
+        x, y = plot_clock.pen_trail
+        ax.plot(x, y, color='r')
         plt.pause(.01)
         await asyncio.sleep(.01)
 
@@ -52,7 +55,7 @@ async def __main(loop):
 
     await asyncio.gather(
         __update_plot(ax0, p),
-        __draw_indefinitely(p, points)
+        __got_to_indefinitely(p, points)
     )
 
 
