@@ -24,7 +24,8 @@ async def __update_plot(ax: Axes, plot_clock: PlotClock, color: str = "b"):
         while len(t) > 0:
             ax.lines.remove(t[-1])
             t = ax.get_lines()
-
+        ax.axvline()
+        ax.axvline(x=2)
         x, y = plot_clock.arms
         ax.plot(x, y, color=color)
         x, y = plot_clock.pen_trail
@@ -36,16 +37,22 @@ async def __update_plot(ax: Axes, plot_clock: PlotClock, color: str = "b"):
 async def __main(loop):
     D = 2
     lower = 2
-    upper = np.sqrt(5)
+    upper = 2
 
-    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.005)
+    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.01)
+    start = 0
+    end = D
 
     points = [
-        [0, 3],
-        [2, 3],
-        [2, 2],
-        [0, 2],
     ]
+    for index, value in enumerate(range(22, 18, -1)):
+        if index % 2 == 0:
+            points.append([start, value/10.0])
+            points.append([end, value/10.0])
+            continue
+        points.append([end, value/10.0])
+        points.append([start, value/10.0])
+
 
     plt.style.use("dark_background")
     fig = plt.figure()
