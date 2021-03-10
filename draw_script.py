@@ -41,10 +41,10 @@ async def __main(loop):
     p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.005)
 
     points = [
-        [0, 2],
+        [0, 3],
+        [2, 3],
         [2, 2],
-        [2, 1.75],
-        [0, 1.75],
+        [0, 2],
     ]
 
     plt.style.use("dark_background")
