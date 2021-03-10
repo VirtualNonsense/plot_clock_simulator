@@ -97,7 +97,8 @@ class PlotClock:
     # private methods
     # ##################################################################################################################
     def __calc_angles(self):
-        angles = point_to_angles(self.__t_x, self.__t_y, self.__lower_arm_length, self.__upper_arm_length, self.__distance)
+        angles = point_to_angles(self.__t_x, self.__t_y, self.__lower_arm_length, self.__upper_arm_length,
+                                 self.__distance)
         self.__l_target_angle = angles[0]
         self.__r_target_angle = angles[1]
 
@@ -108,12 +109,12 @@ class PlotClock:
         while not self.__target_angles_reached():
             r_angle_diff = self.__r_target_angle - self.__r_angle
             l_angle_diff = self.__l_target_angle - self.__l_angle
-            self.__r_angle += r_angle_diff/max_angle_diff * self.servo_max_speed \
-                              + np.sign(r_angle_diff/max_angle_diff) \
-                              * (1 - np.abs(r_angle_diff/max_angle_diff)) * self.servo_min_speed
-            self.__l_angle += l_angle_diff/max_angle_diff * self.servo_max_speed \
-                              + np.sign(l_angle_diff/max_angle_diff) \
-                              * (1 - np.abs(l_angle_diff/max_angle_diff)) * self.servo_min_speed
+            self.__r_angle += r_angle_diff / max_angle_diff * self.servo_max_speed \
+                              + np.sign(r_angle_diff / max_angle_diff) \
+                              * (1 - np.abs(r_angle_diff / max_angle_diff)) * self.servo_min_speed
+            self.__l_angle += l_angle_diff / max_angle_diff * self.servo_max_speed \
+                              + np.sign(l_angle_diff / max_angle_diff) \
+                              * (1 - np.abs(l_angle_diff / max_angle_diff)) * self.servo_min_speed
             self.__calc_pos()
             await asyncio.sleep(.01)
 
