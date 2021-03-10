@@ -29,6 +29,8 @@ class PlotClock:
         self.servo_speed = servo_speed
         self.__t_x: float = 0
         self.__t_y: float = 0
+        self.__x: float = 0
+        self.__y: float = 0
         self.angle_tolerance = servo_speed * 2
 
     # ##################################################################################################################
@@ -44,7 +46,7 @@ class PlotClock:
 
     @property
     def pen_joint(self):
-        return
+        return [self.__x, self.__y]
 
     @property
     def theory_pen_joint(self):
@@ -65,7 +67,7 @@ class PlotClock:
 
     @property
     def arms(self) -> Tuple[List[int], List[int]]:
-        coord = [self.left_servo, self.left_joint, self.theory_pen_joint, self.right_joint, self.right_servo]
+        coord = [self.left_servo, self.left_joint, self.pen_joint, self.right_joint, self.right_servo]
         xs, ys = zip(*coord)  # create lists of x and y values
         return xs, ys
 
@@ -102,6 +104,7 @@ class PlotClock:
             self.__r_angle += sgn * self.servo_speed
             sgn = np.sign(self.__l_target_angle - self.__l_angle)
             self.__l_angle += sgn * self.servo_speed
+            self.__calc_pos()
             await asyncio.sleep(.01)
 
     def __target_angles_reached(self) -> bool:
@@ -109,10 +112,60 @@ class PlotClock:
                and np.abs(self.__l_target_angle - self.__l_angle) < self.angle_tolerance
 
     def __calc_pos(self):
-        y = - np.tan((self.__l_angle + self.__r_angle) / 2)
-
+        q = self.__lower_arm_length * (np.sin(self.__l_angle) - np.sin(self.__r_angle))
+        q_2 = np.power(q, 2)
+        cos_a = np.cos(self.__l_angle)
+        cos_b = np.cos(self.__r_angle)
         l1 = self.__lower_arm_length
-        l2 = self.__upper_arm_length
-        cosa = np.cos(self.__l_angle)
-        sina = np.sin(self.__l_angle)
-        # D = np.power(2*l1*cosa, 2) - 4 * (np.power(l1*cosa, 2) + np.power(y, 2) + 2*y*l1*sina + np.power())
+        l1_2 = np.power(self.__lower_arm_length, 2)
+        d = self.__distance
+        d_2 = np.power(self.__distance, 2)
+        d_3 = np.power(self.__distance, 3)
+        d_4 = np.power(self.__distance, 4)
+        sin_b = np.sin(self.__r_angle)
+        cos_a_2 = np.power(cos_a, 2)
+        cos_b_2 = np.power(cos_b, 2)
+
+        a = 1 + (-2 * cos_a * cos_b
+                 - 2 * l1 * d * cos_a
+                 + l1_2 * cos_a_2
+                 + 2 * d * l1 * cos_b
+                 + l1_2 * cos_b_2 + d_2) \
+            / q_2
+
+        b = -2 * l1 * cos_a \
+            + (2 * d * l1_2 * cos_a * cos_b
+               + d_2 * l1 * cos_a
+               - 3 * d_2 * l1 * cos_b
+               - 2 * d * l1_2 * cos_b
+               - d_3
+               - 2 * l1 * sin_b * (d + l1 * cos_b - l1 * cos_a)) \
+            / q
+
+        c = l1_2 * cos_a_2 \
+            + (d_3 * l1 * cos_b
+               + d_2 * l1_2 * cos_b_2
+               + d_4 / 4) \
+            / q_2 \
+            + (l1 * sin_b * d_2
+               + 2 * l1_2 * sin_b * cos_b * d) \
+            / q \
+            + l1_2 * np.power(sin_b, 2) \
+            - np.power(self.__upper_arm_length, 2)
+
+        D = np.power(b, 2) - 4 * a * c
+        # print(f"{a}, {b}, {c}, {D}")
+
+        y = lambda x: ((d + l1 * cos_b - l1 * cos_a) * x - .5 * d - d * l1 - cos_b) / q
+        x1 = (-b + np.sqrt(D)) / (2*a)
+        x2 = (-b - np.sqrt(D)) / (2*a)
+        y1 = y(x1)
+        y2 = y(x2)
+        print(f"{x1}, {y1}; {x2}, {y2}")
+        if y1 > y2:
+            self.__x = x1
+            self.__y = y1
+            return
+
+        self.__x = x2
+        self.__y = y2
