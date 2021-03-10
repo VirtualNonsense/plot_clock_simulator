@@ -112,10 +112,13 @@ class PlotClock:
 
     async def __move_to_angle(self):
         while not self.__target_angles_reached():
-            sgn = np.sign(self.__r_target_angle - self.__r_angle)
-            self.__r_angle += sgn * self.servo_speed
-            sgn = np.sign(self.__l_target_angle - self.__l_angle)
-            self.__l_angle += sgn * self.servo_speed
+            r_angle_diff = self.__r_target_angle - self.__r_angle
+            l_angle_diff = self.__l_target_angle - self.__l_angle
+            max_angle_diff = np.max([np.abs(r_angle_diff), np.abs(l_angle_diff)])
+            print(f"{self.__l_target_angle} {self.__l_angle} {self.__r_target_angle} {self.__r_angle}")
+
+            self.__r_angle += r_angle_diff/max_angle_diff * self.servo_speed
+            self.__l_angle += l_angle_diff/max_angle_diff * self.servo_speed
             self.__calc_pos()
             await asyncio.sleep(.01)
 
