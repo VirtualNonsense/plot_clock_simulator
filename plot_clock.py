@@ -6,16 +6,6 @@ import numpy as np
 from math_util import loc
 
 
-class Queue:
-    def __init__(self):
-        self.__list: List[str] = []
-
-    def put(self, input: str):
-        self.__list.append(input)
-
-    def pop(self):
-        self.__list.pop(0)
-
 
 class PlotClock:
     def __init__(self, upper_arm_length: float, lower_arm_length: float, servo_distance: float, servo_speed: float):
