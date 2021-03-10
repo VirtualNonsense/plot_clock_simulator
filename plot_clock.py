@@ -22,7 +22,7 @@ class PlotClock:
                  lower_arm_length: float,
                  servo_distance: float,
                  servo_speed: float,
-                 trail_length: int = 2000):
+                 trail_length: int = 1000):
         self.__r_angle: float = np.pi / 2
         self.__r_target_angle: float = np.pi / 2
         self.__l_angle: float = np.pi / 2
@@ -30,11 +30,12 @@ class PlotClock:
         self.__upper_arm_length = upper_arm_length
         self.__lower_arm_length = lower_arm_length
         self.__distance = servo_distance
-        self.servo_speed = servo_speed
+        self.servo_max_speed = servo_speed
+        self.servo_min_speed = servo_speed * 0.1
         self.pen_trail_window = DataWindow(trail_length)
         self.__t_x: float = 0
         self.__t_y: float = 0
-        self.angle_tolerance = servo_speed * 2
+        self.angle_tolerance = self.servo_min_speed * 2
 
     # ##################################################################################################################
     # Properties
@@ -101,14 +102,18 @@ class PlotClock:
         self.__r_target_angle = angles[1]
 
     async def __move_to_angle(self):
+        r_angle_diff = self.__r_target_angle - self.__r_angle
+        l_angle_diff = self.__l_target_angle - self.__l_angle
+        max_angle_diff = np.max([np.abs(r_angle_diff), np.abs(l_angle_diff)])
         while not self.__target_angles_reached():
             r_angle_diff = self.__r_target_angle - self.__r_angle
             l_angle_diff = self.__l_target_angle - self.__l_angle
-            max_angle_diff = np.max([np.abs(r_angle_diff), np.abs(l_angle_diff)])
-            print(f"{self.__l_target_angle} {self.__l_angle} {self.__r_target_angle} {self.__r_angle}")
-
-            self.__r_angle += r_angle_diff/max_angle_diff * self.servo_speed
-            self.__l_angle += l_angle_diff/max_angle_diff * self.servo_speed
+            self.__r_angle += r_angle_diff/max_angle_diff * self.servo_max_speed \
+                              + np.sign(r_angle_diff/max_angle_diff) \
+                              * (1 - np.abs(r_angle_diff/max_angle_diff)) * self.servo_min_speed
+            self.__l_angle += l_angle_diff/max_angle_diff * self.servo_max_speed \
+                              + np.sign(l_angle_diff/max_angle_diff) \
+                              * (1 - np.abs(l_angle_diff/max_angle_diff)) * self.servo_min_speed
             self.__calc_pos()
             await asyncio.sleep(.01)
 
