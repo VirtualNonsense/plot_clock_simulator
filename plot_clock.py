@@ -3,7 +3,7 @@ from typing import *
 
 import numpy as np
 
-from math_util import loc, get_intersections
+from math_util import loc, get_intersections, point_to_angles
 
 
 class DataWindow:
@@ -96,19 +96,9 @@ class PlotClock:
     # private methods
     # ##################################################################################################################
     def __calc_angles(self):
-        x = self.__t_x
-        y = self.__t_y
-        q_alpha = np.sqrt(np.abs(x ** 2) + np.abs(y ** 2)) if x != 0 else np.abs(y)
-        alpha_1 = loc(q_alpha, self.__lower_arm_length, self.__upper_arm_length)
-        alpha_2 = np.arctan(y / x) if x != 0 else np.pi / 2
-        self.__l_target_angle = alpha_1 + alpha_2
-
-        r_x = self.__distance - x
-        q_beta = np.sqrt(np.abs(r_x ** 2) + np.abs(y ** 2)) if r_x != 0 else np.abs(y)
-
-        beta_1 = loc(q_beta, self.__lower_arm_length, self.__upper_arm_length)
-        beta_2 = np.arctan(y / r_x) if r_x != 0 else np.pi / 2
-        self.__r_target_angle = np.pi - (beta_1 + beta_2)
+        angles = point_to_angles(self.__t_x, self.__t_y, self.__lower_arm_length, self.__upper_arm_length, self.__distance)
+        self.__l_target_angle = angles[0]
+        self.__r_target_angle = angles[1]
 
     async def __move_to_angle(self):
         while not self.__target_angles_reached():
