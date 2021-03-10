@@ -40,12 +40,12 @@ async def __main(loop):
     upper = 2
 
     p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.01)
-    start = 0
-    end = D
+    start = -1
+    end = D + 1
 
     points = [
     ]
-    for index, value in enumerate(range(22, 18, -1)):
+    for index, value in enumerate(range(25, 18, -1)):
         if index % 2 == 0:
             points.append([start, value/10.0])
             points.append([end, value/10.0])
