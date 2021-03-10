@@ -3,8 +3,7 @@ from typing import *
 
 import numpy as np
 
-from math_util import loc
-
+from math_util import loc, get_intersections
 
 
 class PlotClock:
@@ -102,56 +101,14 @@ class PlotClock:
                and np.abs(self.__l_target_angle - self.__l_angle) < self.angle_tolerance
 
     def __calc_pos(self):
-        q = self.__lower_arm_length * (np.sin(self.__l_angle) - np.sin(self.__r_angle))
-        q_2 = np.power(q, 2)
-        cos_a = np.cos(self.__l_angle)
-        cos_b = np.cos(self.__r_angle)
-        l1 = self.__lower_arm_length
-        l1_2 = np.power(self.__lower_arm_length, 2)
-        d = self.__distance
-        d_2 = np.power(self.__distance, 2)
-        d_3 = np.power(self.__distance, 3)
-        d_4 = np.power(self.__distance, 4)
-        sin_b = np.sin(self.__r_angle)
-        cos_a_2 = np.power(cos_a, 2)
-        cos_b_2 = np.power(cos_b, 2)
+        intersections = get_intersections(self.left_joint[0], self.left_joint[1], self.__upper_arm_length,
+                                          self.right_joint[0], self.right_joint[1], self.__upper_arm_length)
 
-        a = 1 + (-2 * cos_a * cos_b
-                 - 2 * l1 * d * cos_a
-                 + l1_2 * cos_a_2
-                 + 2 * d * l1 * cos_b
-                 + l1_2 * cos_b_2 + d_2) \
-            / q_2
+        if intersections is None:
+            return
 
-        b = -2 * l1 * cos_a \
-            + (2 * d * l1_2 * cos_a * cos_b
-               + d_2 * l1 * cos_a
-               - 3 * d_2 * l1 * cos_b
-               - 2 * d * l1_2 * cos_b
-               - d_3
-               - 2 * l1 * sin_b * (d + l1 * cos_b - l1 * cos_a)) \
-            / q
+        x1, y1, x2, y2 = intersections
 
-        c = l1_2 * cos_a_2 \
-            + (d_3 * l1 * cos_b
-               + d_2 * l1_2 * cos_b_2
-               + d_4 / 4) \
-            / q_2 \
-            + (l1 * sin_b * d_2
-               + 2 * l1_2 * sin_b * cos_b * d) \
-            / q \
-            + l1_2 * np.power(sin_b, 2) \
-            - np.power(self.__upper_arm_length, 2)
-
-        D = np.power(b, 2) - 4 * a * c
-        # print(f"{a}, {b}, {c}, {D}")
-
-        y = lambda x: ((d + l1 * cos_b - l1 * cos_a) * x - .5 * d - d * l1 - cos_b) / q
-        x1 = (-b + np.sqrt(D)) / (2*a)
-        x2 = (-b - np.sqrt(D)) / (2*a)
-        y1 = y(x1)
-        y2 = y(x2)
-        print(f"{x1}, {y1}; {x2}, {y2}")
         if y1 > y2:
             self.__x = x1
             self.__y = y1
