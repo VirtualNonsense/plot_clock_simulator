@@ -18,7 +18,11 @@ async def __got_to_indefinitely(plot_clock: PlotClock, points: List[List[float]]
             await asyncio.sleep(1)
 
 
-async def __update_plot(ax: Axes, plot_clock: PlotClock, color: str = "b"):
+async def __update_plot(ax: Axes,
+                        plot_clock: PlotClock,
+                        clock_color: str = "b",
+                        pen_trail_color: str = "r",
+                        target_marker_color: str = "y"):
     while True:
         t = ax.get_lines()
         while len(t) > 0:
@@ -26,10 +30,14 @@ async def __update_plot(ax: Axes, plot_clock: PlotClock, color: str = "b"):
             t = ax.get_lines()
         ax.axvline()
         ax.axvline(x=2)
-        x, y = plot_clock.arms
-        ax.plot(x, y, color=color)
         x, y = plot_clock.pen_trail
-        ax.plot(x, y, color='r')
+        ax.plot(x, y, color=pen_trail_color)
+
+        x, y = plot_clock.target_trail
+        ax.plot(x, y, color=target_marker_color, linestyle=" ", marker="+")
+
+        x, y = plot_clock.arms
+        ax.plot(x, y, color=clock_color)
         plt.pause(.01)
         await asyncio.sleep(.01)
 

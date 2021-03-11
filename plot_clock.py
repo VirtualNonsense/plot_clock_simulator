@@ -33,6 +33,7 @@ class PlotClock:
         self.servo_max_speed = servo_speed
         self.servo_min_speed = servo_speed * 0.1
         self.pen_trail_window = DataWindow(trail_length)
+        self.target_trail_window = DataWindow(2)
         self.__t_x: float = 0
         self.__t_y: float = 0
         self.angle_tolerance = self.servo_min_speed * 2
@@ -84,12 +85,19 @@ class PlotClock:
         xs, ys = zip(*self.pen_trail_window.window)
         return xs, ys
 
+    @property
+    def target_trail(self):
+        if len(self.target_trail_window.window) < 1:
+            return 0, 0
+        xs, ys = zip(*self.target_trail_window.window)
+        return xs, ys
     # ##################################################################################################################
     # public methods
     # ##################################################################################################################
     async def got_to(self, x: float, y: float):
         self.__t_x = x
         self.__t_y = y
+        self.target_trail_window.add(self.target_pen_joint)
         self.__calc_angles()
         await self.__move_to_angle()
 
