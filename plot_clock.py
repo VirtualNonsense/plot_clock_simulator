@@ -6,7 +6,7 @@ import numpy as np
 from math_util import loc, get_intersections, point_to_angles
 
 
-class DataWindow:
+class DataBuffer:
     def __init__(self, length):
         self.length = length
         self.window: list = []
@@ -32,8 +32,8 @@ class PlotClock:
         self.__distance = servo_distance
         self.servo_max_speed = servo_speed
         self.servo_min_speed = servo_speed * 0.1
-        self.pen_trail_window = DataWindow(trail_length)
-        self.target_trail_window = DataWindow(2)
+        self.pen_trail_window = DataBuffer(trail_length)
+        self.target_trail_window = DataBuffer(2)
         self.__t_x: float = 0
         self.__t_y: float = 0
         self.angle_tolerance = self.servo_min_speed * 2
