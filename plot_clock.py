@@ -8,13 +8,21 @@ from math_util import loc, get_intersections, point_to_angles
 
 class DataBuffer:
     def __init__(self, length):
-        self.length = length
+        self.__max_length = length
         self.window: list = []
 
-    def add(self, element):
+    def add(self, element: List):
         self.window.append(element)
-        if len(self.window) > self.length:
+        if len(self.window) > self.__max_length:
             self.window.pop(0)
+
+    def add_range(self, elements: List[Any]):
+        for e in elements:
+            self.add(e)
+
+    @property
+    def length(self) -> int:
+        return len(self.window)
 
 
 class PlotClock:
