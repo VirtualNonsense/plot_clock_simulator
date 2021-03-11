@@ -131,18 +131,22 @@ class PlotClock:
         self.__r_target_angle = angles[1]
 
     async def __move_to_angle(self):
-        r_angle_diff = self.__r_target_angle - self.__r_angle
-        l_angle_diff = self.__l_target_angle - self.__l_angle
-        max_angle_diff = np.max([np.abs(r_angle_diff), np.abs(l_angle_diff)])
+        l_counter = 0
+        r_counter = 0
+        l_ratios = DataBuffer(3)
+        r_ratios = DataBuffer(3)
         while not self.__target_angles_reached():
             r_angle_diff = self.__r_target_angle - self.__r_angle
             l_angle_diff = self.__l_target_angle - self.__l_angle
-            self.__r_angle += r_angle_diff / max_angle_diff * self.servo_max_speed \
-                              + np.sign(r_angle_diff / max_angle_diff) \
-                              * (1 - np.abs(r_angle_diff / max_angle_diff)) * self.servo_min_speed
-            self.__l_angle += l_angle_diff / max_angle_diff * self.servo_max_speed \
-                              + np.sign(l_angle_diff / max_angle_diff) \
-                              * (1 - np.abs(l_angle_diff / max_angle_diff)) * self.servo_min_speed
+            max_angle_diff = np.max([np.abs(r_angle_diff), np.abs(l_angle_diff)])
+            r_ratios.add(r_angle_diff/max_angle_diff)
+            l_ratios.add(l_angle_diff/max_angle_diff)
+            if r_ratios.length > 2 and np.sign(r_ratios.window[-2]) != np.sign(r_ratios.window[-1]):
+                r_counter += 1
+            if l_ratios.length > 2 and np.sign(l_ratios.window[-2]) != np.sign(l_ratios.window[-1]):
+                l_counter += 1
+            self.__r_angle += r_ratios.window[-1] * self.servo_max_speed * np.exp(-r_counter)
+            self.__l_angle += l_ratios.window[-1] * self.servo_max_speed * np.exp(-l_counter)
             self.__calc_pos()
             await asyncio.sleep(.01)
 

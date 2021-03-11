@@ -57,8 +57,8 @@ async def __main(loop):
     lower = 2
     upper = 2
 
-    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.05)
-    start = -1
+    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.01)
+    start = 0
     end = D + 1
 
     points = [
