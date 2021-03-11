@@ -11,6 +11,16 @@ import numpy as np
 from plot_clock import PlotClock
 
 
+def generate_parallel_test_lines(points: list, start: float, end: float):
+    for index, value in enumerate(range(25, 23, -1)):
+        if index % 2 == 0:
+            points.append([start, value / 10.0])
+            points.append([end, value / 10.0])
+            continue
+        points.append([end, value / 10.0])
+        points.append([start, value / 10.0])
+
+
 async def __got_to_indefinitely(plot_clock: PlotClock, points: List[List[float]]):
     while True:
         for p in points:
@@ -53,14 +63,8 @@ async def __main(loop):
 
     points = [
     ]
-    for index, value in enumerate(range(25, 16, -1)):
-        if index % 2 == 0:
-            points.append([start, value/10.0])
-            points.append([end, value/10.0])
-            continue
-        points.append([end, value/10.0])
-        points.append([start, value/10.0])
 
+    generate_parallel_test_lines(points, start, end)
 
     plt.style.use("dark_background")
     fig = plt.figure()
