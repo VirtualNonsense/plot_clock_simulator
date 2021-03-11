@@ -32,7 +32,7 @@ async def __update_plot(ax: Axes,
                         plot_clock: PlotClock,
                         clock_color: str = "b",
                         pen_trail_color: str = "r",
-                        target_marker_color: str = "y"):
+                        target_marker_color: str = "m"):
     while True:
         t = ax.get_lines()
         while len(t) > 0:
