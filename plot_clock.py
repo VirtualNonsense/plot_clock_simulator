@@ -30,7 +30,7 @@ class PlotClock:
                  lower_arm_length: float,
                  servo_distance: float,
                  servo_speed: float,
-                 trail_length: int = 1000):
+                 trail_length: int = 2000):
         self.__r_angle: float = np.pi / 2
         self.__r_target_angle: float = np.pi / 2
         self.__l_angle: float = np.pi / 2
@@ -41,6 +41,7 @@ class PlotClock:
         self.servo_max_speed = servo_speed
         self.servo_min_speed = servo_speed * 0.1
         self.pen_trail_window = DataBuffer(trail_length)
+        self.angle_trail_window = DataBuffer(trail_length)
         self.target_trail_window = DataBuffer(2)
         self.__t_x: float = 0
         self.__t_y: float = 0
@@ -100,6 +101,13 @@ class PlotClock:
         xs, ys = zip(*self.target_trail_window.window)
         return xs, ys
 
+    @property
+    def angle_trail(self):
+        if len(self.angle_trail_window.window) < 1:
+            return 0, 0
+        xs, ys = zip(*self.angle_trail_window.window)
+        return xs, ys
+
     # ##################################################################################################################
     # public methods
     # ##################################################################################################################
@@ -127,6 +135,7 @@ class PlotClock:
     def __calc_angles(self, x, y):
         angles = point_to_angles(x, y, self.__lower_arm_length, self.__upper_arm_length,
                                  self.__distance)
+        self.angle_trail_window.add([angles[0] / np.pi, angles[1] / np.pi])
         self.__l_target_angle = angles[0]
         self.__r_target_angle = angles[1]
 
@@ -137,8 +146,8 @@ class PlotClock:
             r_angle_diff = self.__r_target_angle - self.__r_angle
             l_angle_diff = self.__l_target_angle - self.__l_angle
             max_angle_diff = np.max([np.abs(r_angle_diff), np.abs(l_angle_diff)])
-            r_ratios.add(r_angle_diff/max_angle_diff)
-            l_ratios.add(l_angle_diff/max_angle_diff)
+            r_ratios.add(r_angle_diff / max_angle_diff)
+            l_ratios.add(l_angle_diff / max_angle_diff)
             if r_ratios.length > 1 and np.sign(r_ratios.window[-2]) != np.sign(r_ratios.window[-1]):
                 break
             if l_ratios.length > 1 and np.sign(l_ratios.window[-2]) != np.sign(l_ratios.window[-1]):
