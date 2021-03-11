@@ -91,6 +91,7 @@ class PlotClock:
             return 0, 0
         xs, ys = zip(*self.target_trail_window.window)
         return xs, ys
+
     # ##################################################################################################################
     # public methods
     # ##################################################################################################################
@@ -98,14 +99,25 @@ class PlotClock:
         self.__t_x = x
         self.__t_y = y
         self.target_trail_window.add(self.target_pen_joint)
-        self.__calc_angles()
+        if len(self.target_trail_window.window) > 1:
+            last_x, last_y = self.target_trail_window.window[-2]
+            d_x = x - last_x
+            d_y = y - last_y
+            distance = 8 * np.sqrt(np.power(d_x, 2) + np.power(d_y, 2))
+            distance = distance if distance > 1 else 1
+            for i in range(int(distance)):
+                self.__calc_angles(last_x + i * d_x / distance, last_y + i * d_y / distance)
+                await self.__move_to_angle()
+            return
+        self.__calc_angles(x, y)
         await self.__move_to_angle()
+        return
 
     # ##################################################################################################################
     # private methods
     # ##################################################################################################################
-    def __calc_angles(self):
-        angles = point_to_angles(self.__t_x, self.__t_y, self.__lower_arm_length, self.__upper_arm_length,
+    def __calc_angles(self, x, y):
+        angles = point_to_angles(x, y, self.__lower_arm_length, self.__upper_arm_length,
                                  self.__distance)
         self.__l_target_angle = angles[0]
         self.__r_target_angle = angles[1]
