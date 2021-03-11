@@ -131,8 +131,6 @@ class PlotClock:
         self.__r_target_angle = angles[1]
 
     async def __move_to_angle(self):
-        l_counter = 0
-        r_counter = 0
         l_ratios = DataBuffer(2)
         r_ratios = DataBuffer(2)
         while not self.__target_angles_reached():
@@ -142,11 +140,11 @@ class PlotClock:
             r_ratios.add(r_angle_diff/max_angle_diff)
             l_ratios.add(l_angle_diff/max_angle_diff)
             if r_ratios.length > 1 and np.sign(r_ratios.window[-2]) != np.sign(r_ratios.window[-1]):
-                r_counter += 1
+                break
             if l_ratios.length > 1 and np.sign(l_ratios.window[-2]) != np.sign(l_ratios.window[-1]):
-                l_counter += 1
-            self.__r_angle += r_ratios.window[-1] * self.servo_max_speed * np.exp(-r_counter)
-            self.__l_angle += l_ratios.window[-1] * self.servo_max_speed * np.exp(-l_counter)
+                break
+            self.__r_angle += r_ratios.window[-1] * self.servo_max_speed
+            self.__l_angle += l_ratios.window[-1] * self.servo_max_speed
             self.__calc_pos()
             await asyncio.sleep(.01)
 
