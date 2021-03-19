@@ -46,7 +46,7 @@ class PlotClock:
         self.__t_x: float = 0
         self.__t_y: float = 0
         self.angle_tolerance = self.servo_min_speed * 2
-        self.pen_trail_window.add(self.pen_joint_pos)
+        self.target_trail_window.add(self.pen_joint_pos)
 
     # ##################################################################################################################
     # Properties
