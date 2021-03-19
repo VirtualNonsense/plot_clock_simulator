@@ -1,5 +1,6 @@
 import asyncio
 from typing import *
+import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes as Axes
@@ -8,14 +9,21 @@ from matplotlib.ticker import FormatStrFormatter
 from plot_clock import PlotClock
 
 
-def generate_parallel_test_lines(points: list, start: float, end: float):
-    for index, value in enumerate(range(26, 16, -1)):
+def generate_horizontal_parallel_test_lines(point_list: list,
+                                            left: float,
+                                            right: float,
+                                            up: float,
+                                            down: float,
+                                            lines: int):
+    values = np.linspace(up, down, lines)
+
+    for index, value in enumerate(values):
         if index % 2 == 0:
-            points.append([start, value / 10.0])
-            points.append([end, value / 10.0])
+            point_list.append([left, value])
+            point_list.append([right, value])
             continue
-        points.append([end, value / 10.0])
-        points.append([start, value / 10.0])
+        point_list.append([right, value])
+        point_list.append([left, value])
 
 
 async def __got_to_indefinitely(plot_clock: PlotClock, points: List[List[float]]):
@@ -63,15 +71,13 @@ async def __main(loop):
     lower = 2
     upper = 2
 
-    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.01)
-    start = -1
-    end = D + 1
+    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.05)
 
     points = [
     ]
 
-    generate_parallel_test_lines(points, start, end)
-
+    generate_horizontal_parallel_test_lines(points, -1, D+1, 2.5, 1.8, 20)
+    # generate_vertical_parallel_test_lines(points,)
     plt.style.use("dark_background")
     fig = plt.figure()
     ax0: Axes = fig.add_subplot(1, 2, 1)
