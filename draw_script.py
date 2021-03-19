@@ -71,12 +71,12 @@ async def __main(loop):
     lower = 2
     upper = 2
 
-    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.05)
+    p = PlotClock(lower_arm_length=lower, upper_arm_length=upper, servo_distance=D, servo_speed=.025)
 
     points = [
     ]
 
-    generate_horizontal_parallel_test_lines(points, -1, D+1, 2.5, 1.8, 20)
+    generate_horizontal_parallel_test_lines(points, -1, D+1, 2.5, 1.8, 6)
     # generate_vertical_parallel_test_lines(points,)
     plt.style.use("dark_background")
     fig = plt.figure()
