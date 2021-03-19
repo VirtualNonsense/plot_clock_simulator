@@ -3,7 +3,7 @@ from typing import *
 
 import numpy as np
 
-from math_util import loc, get_intersections, point_to_angles
+from math_util import get_intersections, point_to_angles
 
 
 class DataBuffer:
