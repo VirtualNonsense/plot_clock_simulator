@@ -132,17 +132,17 @@ class PlotClock:
             distance = 8 * np.sqrt(np.power(d_x, 2) + np.power(d_y, 2))
             distance = distance if distance > 1 else 1
             for i in range(int(distance)):
-                self.__calc_angles(last_x + i * d_x / distance, last_y + i * d_y / distance)
+                self.__set_angles(last_x + i * d_x / distance, last_y + i * d_y / distance)
                 await self.__move_to_angle()
             return
-        self.__calc_angles(x, y)
+        self.__set_angles(x, y)
         await self.__move_to_angle()
         return
 
     # ##################################################################################################################
     # private methods
     # ##################################################################################################################
-    def __calc_angles(self, x, y):
+    def __set_angles(self, x, y):
         angles = point_to_angles(x, y, self.__lower_arm_length, self.__upper_arm_length,
                                  self.__distance)
         self.angle_trail_window.add([angles[0] / np.pi, angles[1] / np.pi])
