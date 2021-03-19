@@ -46,7 +46,7 @@ class PlotClock:
         self.__t_x: float = 0
         self.__t_y: float = 0
         self.angle_tolerance = self.servo_min_speed * 2
-        self.target_trail_window.add(self.pen_joint_pos)
+        self.target_trail_window.add(self.pen_joint)
 
     # ##################################################################################################################
     # Properties
@@ -58,12 +58,6 @@ class PlotClock:
     @property
     def right_servo(self) -> List[int]:
         return [self.__distance, 0]
-
-    @property
-    def pen_joint(self):
-        if len(self.pen_trail_window.window) < 1:
-            return [None, None]
-        return self.pen_trail_window.window[-1]
 
     @property
     def target_pen_joint(self):
@@ -110,7 +104,7 @@ class PlotClock:
         return xs, ys
 
     @property
-    def pen_joint_pos(self) -> Union[None, List[float]]:
+    def pen_joint(self) -> Union[None, List[float]]:
         intersections = get_intersections(self.left_joint[0], self.left_joint[1], self.__upper_arm_length,
                                           self.right_joint[0], self.right_joint[1], self.__upper_arm_length)
 
@@ -170,10 +164,9 @@ class PlotClock:
                 break
             self.__r_angle += r_ratios.window[-1] * self.servo_max_speed
             self.__l_angle += l_ratios.window[-1] * self.servo_max_speed
-            self.pen_trail_window.add(self.pen_joint_pos)
+            self.pen_trail_window.add(self.pen_joint)
             await asyncio.sleep(.01)
 
     def __target_angles_reached(self) -> bool:
         return np.abs(self.__r_target_angle - self.__r_angle) < self.angle_tolerance \
                and np.abs(self.__l_target_angle - self.__l_angle) < self.angle_tolerance
-
