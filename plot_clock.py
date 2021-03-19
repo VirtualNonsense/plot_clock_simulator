@@ -46,6 +46,7 @@ class PlotClock:
         self.__t_x: float = 0
         self.__t_y: float = 0
         self.angle_tolerance = self.servo_min_speed * 2
+        self.pen_trail_window.add(self.pen_joint_pos)
 
     # ##################################################################################################################
     # Properties
@@ -108,6 +109,21 @@ class PlotClock:
         xs, ys = zip(*self.angle_trail_window.window)
         return xs, ys
 
+    @property
+    def pen_joint_pos(self) -> Union[None, List[float]]:
+        intersections = get_intersections(self.left_joint[0], self.left_joint[1], self.__upper_arm_length,
+                                          self.right_joint[0], self.right_joint[1], self.__upper_arm_length)
+
+        if intersections is None:
+            return None
+
+        x1, y1, x2, y2 = intersections
+
+        if y1 > y2:
+            return [x1, y1]
+
+        return [x2, y2]
+
     # ##################################################################################################################
     # public methods
     # ##################################################################################################################
@@ -154,24 +170,10 @@ class PlotClock:
                 break
             self.__r_angle += r_ratios.window[-1] * self.servo_max_speed
             self.__l_angle += l_ratios.window[-1] * self.servo_max_speed
-            self.__calc_pos()
+            self.pen_trail_window.add(self.pen_joint_pos)
             await asyncio.sleep(.01)
 
     def __target_angles_reached(self) -> bool:
         return np.abs(self.__r_target_angle - self.__r_angle) < self.angle_tolerance \
                and np.abs(self.__l_target_angle - self.__l_angle) < self.angle_tolerance
 
-    def __calc_pos(self):
-        intersections = get_intersections(self.left_joint[0], self.left_joint[1], self.__upper_arm_length,
-                                          self.right_joint[0], self.right_joint[1], self.__upper_arm_length)
-
-        if intersections is None:
-            return
-
-        x1, y1, x2, y2 = intersections
-
-        if y1 > y2:
-            self.pen_trail_window.add([x1, y1])
-            return
-
-        self.pen_trail_window.add([x2, y2])
