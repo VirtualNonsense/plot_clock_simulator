@@ -26,6 +26,23 @@ def generate_horizontal_parallel_test_lines(point_list: list,
         point_list.append([left, value])
 
 
+def generate_vertikal_parallel_test_lines(point_list: list,
+                                          up: float,
+                                          down: float,
+                                          left: float,
+                                          right: float,
+                                          lines: int):
+    values = np.linspace(left, right, lines)
+
+    for index, value in enumerate(values):
+        if index % 2 == 0:
+            point_list.append([value, up])
+            point_list.append([value, down])
+            continue
+        point_list.append([value, down])
+        point_list.append([value, up])
+
+
 async def __got_to_indefinitely(plot_clock: PlotClock, points: List[List[float]]):
     while True:
         for p in points:
@@ -76,8 +93,8 @@ async def __main(loop):
     points = [
     ]
 
-    generate_horizontal_parallel_test_lines(points, -1, D+1, 2.5, 1.8, 6)
-    # generate_vertical_parallel_test_lines(points,)
+    # generate_horizontal_parallel_test_lines(points, -1, D + 1, 2.5, 1.8, 6)
+    generate_vertikal_parallel_test_lines(points, 2.6, 1.9, -1, D + 1, 11)
     plt.style.use("dark_background")
     fig = plt.figure()
     ax0: Axes = fig.add_subplot(1, 2, 1)
